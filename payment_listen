@@ -1,0 +1,13 @@
+cron:
+  # 定时执行 JavaScript 脚本
+  script:
+    - name: payment_listen 
+      cron: '*/30 * * * *' 
+      timeout: 10 
+      argument: '' 
+      debug: false # 开发模式，每次执行前会从 provider 加载最新脚本
+ 
+script-providers:
+  payment_listen:
+    url: https://raw.githubusercontent.com/J-Chien/Sub/master/payment_listen.js
+    interval: 86400
