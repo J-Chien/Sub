@@ -1,0 +1,20 @@
+name: Tap_GetCookie
+desc: 获取 TikTok Shop Partner Cookie
+
+http:
+  mitm:
+    - partner.eu.tiktokshop.com
+  script:
+    - match: https?:\/\/partner\.eu\.tiktokshop\.com\/api\/v1\/affiliate\/
+      name: tap_getCookie
+      type: request
+      require-body: false
+      timeout: 10 # script timeout in second (optional)
+      argument: '' # script argument (optional)
+      debug: false # 开发模式，每次执行前会从 provider 加载最新脚本
+      binary-mode: false # 以二进制模式获取 body
+      max-size: 1048576 # 1MB
+script-providers:
+  tap_getCookie:
+    url: https://raw.githubusercontent.com/J-Chien/Sub/master/tap_getCookie.js
+    interval: 86400
