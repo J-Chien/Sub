@@ -175,8 +175,8 @@ const $ = new jamie();
             const title =  `💰 佣金变更`;
             const subtitle = `⏰ ${$.formatTime(Date.now(), 'Asia/Taipei')}`;
             let body = `${parseFloat(currentPaymentInfo["data"]["pending_payment"]) - parseFloat(previousPaymentInfo["data"]["pending_payment"]) > 0 ? '📈 新增' : '📉 减少'} `;
-            body += `${Math.abs(parseFloat(currentPaymentInfo["data"]["pending_payment"]) - parseFloat(previousPaymentInfo["data"]["pending_payment"])).toFixed(2)}`;
-            body += `，总计 ${currentPaymentInfo["data"]["pending_payment"]}`
+            body += `£${Math.abs(parseFloat(currentPaymentInfo["data"]["pending_payment"]) - parseFloat(previousPaymentInfo["data"]["pending_payment"])).toFixed(2)}`;
+            body += `，总计 £${currentPaymentInfo["data"]["pending_payment"]}`
 
             notifications.push({
                 title: title,
