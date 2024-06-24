@@ -193,9 +193,7 @@ const $ = new jamie();
         }
 
         notifications.forEach(notification => {
-            $notification.post(notification.title, notification.subtitle, notification.body, {
-                url: notification.url
-            });
+            $notification.post(notification.title, notification.subtitle, notification.body);
             console.log(`\n${notification.title}\n${notification.subtitle}\n${notification.body}`)
         });
         $.done();
