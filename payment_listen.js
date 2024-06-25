@@ -69,18 +69,18 @@ const $ = new jamie();
         const currentPaymentInfo = await $.httpAPI(apiConfigs.getPaymentInfo);
 
         if (currentPaymentInfo["message"] === "no login") {
-            console.log(currentPaymentInfo)
+            console.log(currentPaymentInfo);
             $notification.post('!!!ERROR!!!', 'Error Message', '请重新获取 Cookie');
             $.done();
-        }
+        };
 
         if ($persistentStore.read('SHENSI_Payment_stat') === null) {
             $persistentStore.write(JSON.stringify(currentPaymentInfo), 'SHENSI_Payment_stat');
             console.log(缓存写入成功);
             $.done();
-        }
+        };
 
-        const previousPaymentInfo = JSON.parse($persistentStore.read('SHENSI_Payment_stat'))
+        const previousPaymentInfo = JSON.parse($persistentStore.read('SHENSI_Payment_stat'));
         const notifications = [];
 
         if (currentPaymentInfo["data"]["pending_payment"] !== previousPaymentInfo["data"]["pending_payment"]) {
@@ -88,30 +88,30 @@ const $ = new jamie();
             const subtitle = `⏰ ${$.formatTime(Date.now(), 'Asia/Taipei')}`;
             let body = `${parseFloat(currentPaymentInfo["data"]["pending_payment"]) - parseFloat(previousPaymentInfo["data"]["pending_payment"]) > 0 ? '📈 新增' : '📉 减少'} `;
             body += `£${Math.abs(parseFloat(currentPaymentInfo["data"]["pending_payment"]) - parseFloat(previousPaymentInfo["data"]["pending_payment"])).toFixed(2)}`;
-            body += `，总计 £${currentPaymentInfo["data"]["pending_payment"]}`
+            body += `，总计 £${currentPaymentInfo["data"]["pending_payment"]}`;
 
             notifications.push({
                 title: title,
                 subtitle: subtitle,
                 body: body,
             });
-        }
+        };
 
         if (notifications.length === 0) {
-            console.log(`${$.formatTime(Date.now(), 'Asia/Taipei')} 监控，无更新`)
-            $.done()
-        }
+            console.log(`${$.formatTime(Date.now(), 'Asia/Taipei')} 监控，无更新`);
+            $.done();
+        };
 
-		$persistentStore.write(JSON.stringify(currentPaymentInfo), 'SHENSI_Payment_stat');
+	$persistentStore.write(JSON.stringify(currentPaymentInfo), 'SHENSI_Payment_stat');
 
         notifications.forEach(notification => {
             $notification.post(notification.title, notification.subtitle, notification.body);
-            console.log(`\n${notification.title}\n${notification.subtitle}\n${notification.body}`)
+            console.log(`\n${notification.title}\n${notification.subtitle}\n${notification.body}`);
         });
         $.done();
     } catch (error) {
         $notification.post('!!!ERROR!!!', 'Error Message', error);
-        console.log(error)
+        console.log(error);
         $.done();
-    }
+    };
 })();
