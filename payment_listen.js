@@ -74,7 +74,7 @@ const $ = new jamie();
             $.done();
         }
 
-        if ($persistentStore.read('SHENSI_Payment_stat') === null) {
+        if ($persistentStore.read('SHENSI_Payment_stat') == null) {
             $persistentStore.write(JSON.stringify(currentPaymentInfo), 'SHENSI_Payment_stat');
             console.log(缓存写入成功);
             $.done();
