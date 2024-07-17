@@ -191,7 +191,7 @@ const $ = new jamie();
         });
 
         const currentCampaignData = campaignStats
-        if ($persistentStore.read('SHENSI_Camp_stat') === null) {
+        if ($persistentStore.read('SHENSI_Camp_stat') == null) {
             $persistentStore.write(JSON.stringify(currentCampaignData), 'SHENSI_Camp_stat');
             console.log(缓存写入成功);
             $.done();
