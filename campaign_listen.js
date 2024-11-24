@@ -10,6 +10,7 @@ class jamie {
             "collaborated_creators_num": "建联达人",
             "estimated_partner_commission": "预计佣金",
             "promoted_creator_num": "发布达人",
+            "promotion_end_time": "结束时间",
         };
         // 添加并发控制参数
         this.maxConcurrent = 10; // 最大并发数
@@ -242,10 +243,13 @@ const $ = new jamie();
                 if (currentCampaign[key] !== previousCampaign[key]) {
                     const title = `📊 ${$.mapping[key] || key}发生变更`;
                     const subtitle = `📌 ${currentCampaign.name}`;
-                    let body = `${parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key]) > 0 ? '📈 新增' : '📉 减少'} `;
+                    let body = `${parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key]) > 0 ? '📈 新增' : '📉 减少'}`;
                     if (key === "estimated_partner_commission") {
-                        body += `£${(Math.abs(parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key]))).toFixed(2)}`;
+                        body += `£${Math.abs(parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key])).toFixed(2)}`;
                         body += `，总计 £${currentCampaign[key]}`
+                    } else if (key === "promotion_end_time") {
+                        body += `${Math.abs(parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key]))/86400000} 天`;
+                        body += `，活动结束时间: ${$.formatTime(currentCampaign.promotion_end_time, 'Europe/London')}`;
                     } else {
                         body += `${Math.abs(parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key]))}`;
                         body += `，总计 ${currentCampaign[key]}`
@@ -283,7 +287,7 @@ const $ = new jamie();
 
         notifications.forEach(notification => {
             $notification.post(notification.title, notification.subtitle, notification.body);
-            console.log(`\n${notification.title}\n${notification.subtitle}\n${notification.body}}`)
+            console.log(`\n${notification.title}\n${notification.subtitle}\n${notification.body}`)
         });
         
         $.done();
