@@ -243,7 +243,7 @@ const $ = new jamie();
                 if (currentCampaign[key] !== previousCampaign[key]) {
                     const title = `📊 ${$.mapping[key] || key}发生变更`;
                     const subtitle = `📌 ${currentCampaign.name}`;
-                    let body = `${parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key]) > 0 ? '📈 新增' : '📉 减少'}`;
+                    let body = `${parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key]) > 0 ? '📈 新增' : '📉 减少'} `;
                     if (key === "estimated_partner_commission") {
                         body += `£${Math.abs(parseFloat(currentCampaign[key]) - parseFloat(previousCampaign[key])).toFixed(2)}`;
                         body += `，总计 £${currentCampaign[key]}`
