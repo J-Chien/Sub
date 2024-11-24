@@ -11,7 +11,30 @@ class jamie {
             "estimated_partner_commission": "预计佣金",
             "promoted_creator_num": "发布达人",
         };
+        // 添加并发控制参数
+        this.maxConcurrent = 10; // 最大并发数
+        this.requestDelay = 10; // 请求间隔(毫秒)
     }
+
+    // 添加延时函数
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // 分批处理数组
+    async batchProcess(items, batchSize, processFn) {
+        const results = [];
+        for (let i = 0; i < items.length; i += batchSize) {
+            const batch = items.slice(i, i + batchSize);
+            const batchResults = await Promise.all(batch.map(processFn));
+            results.push(...batchResults);
+            if (i + batchSize < items.length) {
+                await this.delay(this.requestDelay);
+            }
+        }
+        return results;
+    }
+
     httpAPI(config, params = {}, body = null) {
         const fullPath = config.path + '?' + this.parseParam({
             ...config.params,
@@ -36,7 +59,7 @@ class jamie {
                 }
             })
         });
-    };
+    }
 
     parseParam(params) {
         return Object.entries(params)
@@ -54,12 +77,12 @@ class jamie {
             day: 'numeric',
         };
         return date.toLocaleDateString('zh-CN', options);
-    };
+    }
 
     done = (body) => {
         $done(body);
-    };
-};
+    }
+}
 
 const apiConfigs = {
     // 获取进行中的 campaign
@@ -156,21 +179,20 @@ const $ = new jamie();
             $notification.post('!!!ERROR!!!', 'Error Message', '请重新获取 Cookie');
             $.done();
         }
-        const campaigns = [];
-        campaignList.data.campaign.map((campaign) => {
-            campaigns.push({
-                name: campaign.name,
-                campaign_id: campaign.campaign_id,
-                promotion_start_time: campaign.promotion_start_time,
-                promotion_end_time: campaign.promotion_end_time,
-            });
-        });
 
-        const statPromises = campaigns.map(async (campaign) => {
+        const campaigns = campaignList.data.campaign.map((campaign) => ({
+            name: campaign.name,
+            campaign_id: campaign.campaign_id,
+            promotion_start_time: campaign.promotion_start_time,
+            promotion_end_time: campaign.promotion_end_time,
+        }));
+
+        // 使用批处理获取统计数据
+        const getCampaignStat = async (campaign) => {
             const campaignStat = await $.httpAPI(apiConfigs.getCampaignStatistics, {
                 campaign_id: campaign.campaign_id,
             });
-
+            
             return {
                 ...campaign,
                 sold_products: campaignStat.data.sold_products,
@@ -178,9 +200,9 @@ const $ = new jamie();
                 promoted_creator_num: campaignStat.data.indicator_data.promoted_creator_num,
                 estimated_partner_commission: campaignStat.data.indicator_data.estimated_partner_commission,
             };
-        });
+        };
 
-        const campaignStats = await Promise.all(statPromises);
+        const campaignStats = await $.batchProcess(campaigns, $.maxConcurrent, getCampaignStat);
 
         campaignStats.sort((a, b) => {
             if (a.estimated_partner_commission === b.estimated_partner_commission) {
@@ -190,15 +212,19 @@ const $ = new jamie();
             }
         });
 
-        const currentCampaignData = campaignStats
-        if ($persistentStore.read('SHENSI_Camp_stat') == null) {
+        const currentCampaignData = campaignStats;
+        
+        // 处理缓存和通知的逻辑...
+        if ($persistentStore.read('SHENSI_Camp_stat') === null) {
             $persistentStore.write(JSON.stringify(currentCampaignData), 'SHENSI_Camp_stat');
-            console.log(缓存写入成功);
+            console.log('缓存写入成功');
             $.done();
         }
-        const previousCampaignData = JSON.parse($persistentStore.read('SHENSI_Camp_stat'))
+
+        const previousCampaignData = JSON.parse($persistentStore.read('SHENSI_Camp_stat'));
         const notifications = [];
 
+        // 比较逻辑和通知生成保持不变...
         currentCampaignData.forEach(currentCampaign => {
             const previousCampaign = previousCampaignData.find(item => item.campaign_id === currentCampaign.campaign_id);
 
@@ -207,7 +233,7 @@ const $ = new jamie();
                     title: `⬆️ Campaign 已新增`,
                     subtitle: `📌 ${currentCampaign.name}`,
                     body: `⏰ 活动开始时间: ${$.formatTime(currentCampaign.promotion_start_time, 'Europe/London')}`,
-                    //url: `https://partner.eu.tiktokshop.com/affiliate-campaign/platform-campaign/detail?campaign_id=${currentCampaign.campaign_id}&tab=details`,
+                    url: `https://partner.eu.tiktokshop.com/affiliate-campaign/platform-campaign/detail?campaign_id=${currentCampaign.campaign_id}&tab=details`,
                 });
                 return;
             }
@@ -259,6 +285,7 @@ const $ = new jamie();
             $notification.post(notification.title, notification.subtitle, notification.body);
             console.log(`\n${notification.title}\n${notification.subtitle}\n${notification.body}}`)
         });
+        
         $.done();
     } catch (error) {
         $notification.post('!!!ERROR!!!', 'Error Message', error);
