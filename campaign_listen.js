@@ -233,7 +233,7 @@ const $ = new jamie();
                     title: `⬆️ Campaign 已新增`,
                     subtitle: `📌 ${currentCampaign.name}`,
                     body: `⏰ 活动开始时间: ${$.formatTime(currentCampaign.promotion_start_time, 'Europe/London')}`,
-                    url: `https://partner.eu.tiktokshop.com/affiliate-campaign/platform-campaign/detail?campaign_id=${currentCampaign.campaign_id}&tab=details`,
+                    //url: `https://partner.eu.tiktokshop.com/affiliate-campaign/platform-campaign/detail?campaign_id=${currentCampaign.campaign_id}&tab=details`,
                 });
                 return;
             }
