@@ -12,5 +12,5 @@ cron:
  
 script-providers:
   payment_listen:
-    url: https://raw.githubusercontent.com/J-Chien/Sub/master/payment_listen.js
+    url: https://raw.githubusercontent.com/J-Chien/Sub/master/Script/payment_listen.js
     interval: 86400
