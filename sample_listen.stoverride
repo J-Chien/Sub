@@ -12,5 +12,5 @@ cron:
  
 script-providers:
   sample_listen:
-    url: https://raw.githubusercontent.com/J-Chien/Sub/master/sample_listen.js
+    url: https://raw.githubusercontent.com/J-Chien/Sub/master/Script/sample_listen.js
     interval: 86400
