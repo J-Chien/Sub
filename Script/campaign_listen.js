@@ -95,6 +95,7 @@ const apiConfigs = {
             "cur_page": 1,
             "page_size": 50,
             "crs_campaign_type": 3,
+            "partner_id": "8650039763468192517",
         },
     },
     // 获取 campaign 信息
@@ -121,6 +122,7 @@ const apiConfigs = {
         method: 'GET',
         params: {
             "campaign_id": "",
+            "partner_id": "8650039763468192517",
         },
     },
     // 获取商品信息
@@ -175,9 +177,10 @@ const $ = new jamie();
 (async () => {
     try {
         const campaignList = await $.httpAPI(apiConfigs.getOngoingCampaign);
-        if (campaignList["message"] === "no login") {
+        if (campaignList["code"] !== 0) {
             console.log(campaignList)
-            $notification.post('!!!ERROR!!!', 'Error Message', '请重新获取 Cookie');
+            const msg = campaignList["message"] || campaignList["msg"];
+            $notification.post('❌ ERROR!!!', `code: ${campaignList["code"]}`, `msg: ${msg}`);
             $.done();
         }
 
@@ -216,13 +219,15 @@ const $ = new jamie();
         const currentCampaignData = campaignStats;
         
         // 处理缓存和通知的逻辑...
-        if ($persistentStore.read('SHENSI_Camp_stat') === null) {
-            $persistentStore.write(JSON.stringify(currentCampaignData), 'SHENSI_Camp_stat');
+        let previousCampaignData = $persistentStore.read('SHENSI_Camp_stat')
+        if (!previousCampaignData) {
+        	$persistentStore.write(JSON.stringify(currentCampaignData), 'SHENSI_Camp_stat');
             console.log('缓存写入成功');
             $.done();
+        } else {
+        	previousCampaignData = JSON.parse(previousCampaignData)
         }
-
-        const previousCampaignData = JSON.parse($persistentStore.read('SHENSI_Camp_stat'));
+        
         const notifications = [];
 
         // 比较逻辑和通知生成保持不变...
