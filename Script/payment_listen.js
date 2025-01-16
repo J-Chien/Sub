@@ -59,6 +59,9 @@ const apiConfigs = {
     getPaymentInfo: {
         path: '/api/v1/oec/affiliate/agent/summary',
         method: 'GET',
+	params: {
+            "partner_id": "8650039763468192517"
+        },
     },
 };
 
@@ -68,9 +71,10 @@ const $ = new jamie();
     try {
         const currentPaymentInfo = await $.httpAPI(apiConfigs.getPaymentInfo);
 
-        if (currentPaymentInfo["message"] === "no login") {
+        if (currentPaymentInfo["code"] !== 0) {
             console.log(currentPaymentInfo)
-            $notification.post('!!!ERROR!!!', 'Error Message', '请重新获取 Cookie');
+            const msg = currentPaymentInfo["message"] || currentPaymentInfo["msg"];
+            $notification.post('❌ ERROR!!!', `code: ${currentPaymentInfo["code"]}`, `msg: ${msg}`);
             $.done();
         }
 
@@ -96,13 +100,13 @@ const $ = new jamie();
                 body: body,
             });
         }
+	
+	$persistentStore.write(JSON.stringify(currentPaymentInfo), 'SHENSI_Payment_stat');
 
         if (notifications.length === 0) {
             console.log(`${$.formatTime(Date.now(), 'Asia/Taipei')} 监控，无更新`)
             $.done()
         }
-
-	$persistentStore.write(JSON.stringify(currentPaymentInfo), 'SHENSI_Payment_stat');
 
         notifications.forEach(notification => {
             $notification.post(notification.title, notification.subtitle, notification.body);
