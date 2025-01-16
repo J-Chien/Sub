@@ -176,6 +176,9 @@ const apiConfigs = {
     getSampleRecords: {
         path: '/api/v1/affiliate/partner/sample/records/list',
         method: 'POST',
+        params: {
+            "partner_id": "8650039763468192517",
+        },
         body: {
             "search_params": [
                 {
@@ -202,22 +205,24 @@ const $ = new jamie();
 (async () => {
     try {
         const sampleRecords = await $.httpAPI(apiConfigs.getSampleRecords,{},apiConfigs.getSampleRecords.body);
-        if (sampleRecords["message"] === "no login") {
+        if (sampleRecords["code"] !== 0) {
             console.log(sampleRecords)
-            $notification.post('!!!ERROR!!!', 'Error Message', '请重新获取 Cookie');
+            const msg = sampleRecords["message"] || sampleRecords["msg"];
+            $notification.post('❌ ERROR!!!', `code: ${sampleRecords["code"]}`, `msg: ${msg}`);
             $.done();
         }
 
         const currentSampleStatus = sampleRecords.data.sample_status_num_map
 
-        // 处理缓存和通知的逻辑...
-        if ($persistentStore.read('SHENSI_Sample_stat') === null) {
-            $persistentStore.write(JSON.stringify(currentSampleStatus), 'SHENSI_Sample_stat');
+        let previousSampleStatus = $persistentStore.read('SHENSI_Sample_stat')
+        if (!previousSampleStatus) {
+        	$persistentStore.write(JSON.stringify(currentSampleStatus), 'SHENSI_Sample_stat');
             console.log('缓存写入成功');
             $.done();
+        } else {
+        	previousSampleStatus = JSON.parse(previousSampleStatus)
         }
 
-        const previousSampleStatus = JSON.parse($persistentStore.read('SHENSI_Sample_stat'));
         const statusOrder = ["READY_TO_SHIP_1", "SHIPPED", "CONTENT_PENDING", "COMPLETED", "CANCELED"];
 
         let totalPrevious = 0;
@@ -245,7 +250,7 @@ const $ = new jamie();
         // 格式化通知内容
         const subtitleDiff = totalCurrent - totalPrevious;
         const subtitleSymbol = subtitleDiff > 0 ? `↑${subtitleDiff}` : subtitleDiff < 0 ? `↓${Math.abs(subtitleDiff)}` : '';
-        const subtitle = `🔄 全部\t${totalCurrent}${subtitleSymbol ? `\t${subtitleSymbol}` : ''}`;
+        const subtitle = `🔄 全  部\t${totalCurrent}${subtitleSymbol ? `\t${subtitleSymbol}` : ''}`;
 
         const body = changes
             .filter(change => statusOrder.includes(change.key))
