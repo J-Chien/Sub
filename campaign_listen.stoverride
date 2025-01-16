@@ -12,5 +12,5 @@ cron:
  
 script-providers:
   campaign_listen:
-    url: https://raw.githubusercontent.com/J-Chien/Sub/master/campaign_listen.js
+    url: https://raw.githubusercontent.com/J-Chien/Sub/master/Script/campaign_listen.js
     interval: 86400
